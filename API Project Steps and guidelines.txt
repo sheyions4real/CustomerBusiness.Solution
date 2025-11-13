@@ -1,0 +1,137 @@
+- Create the Database and tables
+- Create the API Code
+- Add a xUnit test project to solution
+-- From the project terminal install Efcore tools and efcore power tools
+		dotnet tool install --global dotnet-ef
+		or to target a version
+		
+		dotnet tool install --global dotnet-ef --version 9.0.6
+
+		
+		install also 
+		EF Core Power Tools (Visual Studio Extension)
+		
+		-- Add the EntityFramework core libraries
+		[dotnet add package Microsoft.EntityFrameworkCore --version 9.0.0
+		dotnet add package Microsoft.EntityFrameworkCore.SqlServer --version 9.0.0
+		dotnet add package Microsoft.EntityFrameworkCore.Tools --version 9.0.0 ]
+		
+		or to target a version
+		[dotnet add package Microsoft.EntityFrameworkCore --version 9.0.0
+			dotnet add package Microsoft.EntityFrameworkCore.Design --version 9.0.0
+			dotnet add package Microsoft.EntityFrameworkCore.SqlServer --version 9.0.0]
+
+-- Setup swagger Gen and UI for development Env
+	Lets add the package and configure our program.cs file
+	dotnet add package Swashbuckle.AspNetCore --version 6.6.2
+
+	add the swaggerGen Services to the builder and the app.useSwaggerUI options
+
+
+
+-- Create the DbModels and EFCore entities
+ ---- Option 1
+		Use EF Core Powertools to reverse endineer the dbContext and the Models
+		
+		
+ ---- Option 2
+		Manually create the models and DbContext. 
+		/Models
+ ├── Tenant.cs
+ ├── Business.cs
+ ├── Address.cs
+ ├── Customer.cs
+ ├── Product.cs
+ ├── Service.cs
+ ├── Schedule.cs
+ ├── Sale.cs
+ ├── SaleItem.cs
+ ├── User.cs
+ ├── LoginToken.cs
+ └── AppDbContext.cs
+		
+ ---- Finally configure the dbContext in the program.cs
+		
+  // Register the reverse-engineered DbContext
+	builder.Services.AddDbContext<AppDbContext>(options =>
+		options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+		
+-- After option 2 Approach 
+		you can run migrations to create the database from the models already created and configured
+		run the following migrations
+		--- dotnet ef migrations add InitialCreate
+		--- dotnet ef database update
+
+
+
+
+-- ARCHITECTURE AND FOLDER STRUCTURE
+ -- we will use layered and feature based achitecture together
+ 
+Layers = responsibility boundaries
+
+Presentation → handles HTTP requests / controllers
+
+Application → business logic, services, use cases
+
+Persistence → database / repositories
+
+Infrastructure → cross-cutting concerns
+
+
+
+Features = functional boundaries
+
+Each feature represents a self-contained piece of functionality, like Appointments, Schedules, Users, etc.
+
+Features can group the Presentation + Application parts for that feature.
+
+Persistence & Infrastructure remain shared and outside features because they are reused by multiple features.
+
+
+/Presentation           <-- optional global presentation folder for shared controllers
+/Application           <-- optional global services folder for shared business logic
+/Persistence           <-- DbContext, Entities, Repositories
+/Infrastructure        <-- cross-cutting services (email, pdf, logging, http client, middleware, etc.)
+/Features
+    /Appointments
+        /Controllers   <-- Feature-specific controllers
+        /Services      <-- Feature-specific application services
+        /Dto           <-- Feature-specific DTOs
+        /Mappers       <-- Feature-specific mapping logic
+        /Validation    <-- Feature-specific validators
+    /Schedules
+        /Controllers
+        /Services
+        /Dto
+        /Mappers
+        /Validation
+		
+		
+---------------------------------------------------------------------
+AppointmentsController (Presentation)
+      |
+      v
+AppointmentService (Application)
+      |
+      v
+Repository<Appointment> (Persistence)
+      ^
+      |
+Infrastructure (Email, Logging, etc.)
+
+
+
+
+
+-- REPOSITORY PATTERN AND UNIT OF WORK
+
+
+
+
+-- DATABASE SEEDING
+
+
+
+
+
