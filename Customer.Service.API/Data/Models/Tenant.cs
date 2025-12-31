@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace CustomerBusiness.Solution.Data.Models
+namespace Customer.Service.API.Data.Models
 {
     public class Tenant
     {

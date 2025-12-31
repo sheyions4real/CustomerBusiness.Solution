@@ -1,4 +1,6 @@
-﻿using CustomerBusiness.Solution.Data.Models;
+﻿using Customer.Service.API.Data.Models;
+using Customer.Service.API.Features.Customer.Services;
+using Customer.Service.API.Features.Customer.Services.Contracts;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +22,8 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+
 
 var app = builder.Build();
 

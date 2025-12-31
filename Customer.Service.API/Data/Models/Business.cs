@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace CustomerBusiness.Solution.Data.Models
+namespace Customer.Service.API.Data.Models
 {
+    [Table("Businesses")]
     public class Business
     {
         [Key]

@@ -1,12 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Customer.Service.API.Data.Models
+namespace Customer.Service.API.Features.Customer.DTO
 {
-    public partial class Address
+    public class CreateAddressDto
     {
-        [Key]
-        public Guid AddressId { get; set; }
-
         [MaxLength(255)]
         public string? Street { get; set; }
 
@@ -21,10 +18,6 @@ namespace Customer.Service.API.Data.Models
 
         [MaxLength(100)]
         public string? Country { get; set; }
-
         public bool IsPrimary { get; set; } = false;
-
-        public Guid CustomerId { get; set; }
-        public Customer? Customer { get; set; }
     }
 }
