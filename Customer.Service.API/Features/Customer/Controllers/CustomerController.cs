@@ -20,16 +20,17 @@ namespace Customer.Service.API.Features.Customer.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllAsync(CancellationToken cancellationToken)
         {
-           var customers = await _customerService.GetAllCustomersAsync(cancellationToken);
+            var customers = await _customerService.GetAllCustomersAsync(cancellationToken);
             return Ok(customers);
         }
 
         [HttpGet("{id:guid}", Name = "GetCustomerById")]
         public async Task<IActionResult> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-           var customer = await _customerService.GetCustomerByIdAsync(id, cancellationToken);
+            var customer = await _customerService.GetCustomerByIdAsync(id, cancellationToken);
             if (customer is null) return NotFound($"Customer with id: {id} not found");
 
+            // to be replace with automapper later
             var response = new CustomerDto
             {
                 CustomerId = customer.CustomerId,
@@ -77,10 +78,11 @@ namespace Customer.Service.API.Features.Customer.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateCustomerAsync([FromBody] CreateCustomerDto customerDto, CancellationToken cancellationToken)
         {
-           var createdCustomer = await _customerService.CreateCustomerAsync(customerDto, cancellationToken);
-          if (createdCustomer is null) 
+            var createdCustomer = await _customerService.CreateCustomerAsync(customerDto, cancellationToken);
+            if (createdCustomer is null)
                 return Problem("Failed to create customer.");
 
+            // to be replace with automapper later
             var response = new CustomerDto
             {
                 CustomerId = createdCustomer.CustomerId,
@@ -128,6 +130,89 @@ namespace Customer.Service.API.Features.Customer.Controllers
                 new { id = createdCustomer.CustomerId },
                 response
             );
+        }
+
+
+        [HttpPut("{customerId:guid}")]
+        public async Task<IActionResult> UpdateCustomerAsync([FromRoute] Guid customerId, [FromBody] UpdateCustomerDto customerDto, CancellationToken cancellationToken)
+        {
+            // Implementation for updating a customer would go here
+            if (customerDto == null)
+            {
+                return BadRequest("Customer data is required.");
+            }
+
+            // Save changes
+            var updatedCustomer = await _customerService.UpdateCustomerAsync(customerId, customerDto, cancellationToken);
+            if (updatedCustomer == null)
+            {
+                return NotFound($"Customer with id: {customerId} not found.");
+            }
+
+            // to be replace with automapper later
+            var response = new CustomerDto
+            {
+                CustomerId = updatedCustomer.CustomerId,
+                BusinessId = updatedCustomer.BusinessId,
+                FullName = updatedCustomer.FullName,
+                Email = updatedCustomer.Email,
+                Phone = updatedCustomer.Phone,
+                Status = updatedCustomer.Status,
+                Notes = updatedCustomer.Notes,
+                CreatedAt = updatedCustomer.CreatedAt,
+                CreatedBy = updatedCustomer.CreatedBy,
+                ModifiedAt = updatedCustomer.ModifiedAt,
+                ModifiedBy = updatedCustomer.ModifiedBy,
+                PrimaryAddress = updatedCustomer.Addresses
+             .FirstOrDefault(a => a.IsPrimary) is Address primary
+             ? new AddressDto
+             {
+                 AddressId = primary.AddressId,
+                 Street = primary.Street,
+                 City = primary.City,
+                 Province = primary.Province,
+                 PostalCode = primary.PostalCode,
+                 Country = primary.Country,
+                 IsPrimary = primary.IsPrimary
+             }
+             : null,
+                OtherAddresses = updatedCustomer.Addresses
+             .Where(a => !a.IsPrimary)
+             .Select(a => new AddressDto
+             {
+                 AddressId = a.AddressId,
+                 Street = a.Street,
+                 City = a.City,
+                 Province = a.Province,
+                 PostalCode = a.PostalCode,
+                 Country = a.Country,
+                 IsPrimary = a.IsPrimary
+             })
+             .ToList()
+            };
+
+
+            return Ok(response);
+        }
+
+
+
+        [HttpDelete("{customerId:guid}")]
+        public async Task<IActionResult> DeleteCustomerAsync(Guid customerId, CancellationToken cancellationToken)
+        {
+            // Implementation for deleting a customer would go here
+            var deleted = await _customerService.DeleteCustomerAsync(customerId, cancellationToken);
+            if (deleted is null)
+            {
+                return NotFound($"Customer with id: {customerId} not found.");
+            }
+
+            if (deleted == false)
+            {
+                return Problem("Failed to delete customer.");
+            }
+
+            return Ok(deleted);
         }
     }
 }
